@@ -25,7 +25,7 @@ function createInstructions(text){
 					.attr("x", 0.01*instructionPaneSize.width)
 					.attr("y", 0.6*instructionPaneSize.height)
 					.attr("inline-size", instructionPaneSize.width)
-					.style("font-size", 24*(scalingFactor**0.5))
+					.style("font-size", 24*(Math.pow(scalingFactor,0.5)))
 					.text("Pendulum Simulation : " + text);
 
 //****************************************************************************************************************************//
@@ -34,9 +34,9 @@ function createInstructions(text){
 	backButton = instructionPane.append("g").attr("transform", "translate(" +0.84*instructionPaneSize.width+ "," +0.25*instructionPaneSize.height+ ")");
 
 	backButton.append("text")
-				.attr("x", 0.5*75*(scalingFactor**0.5))
-				.attr("y", 0.5*36*(scalingFactor**0.5))
-				.style("font-size", 22*(scalingFactor**0.5))
+				.attr("x", 0.5*75*(Math.pow(scalingFactor,0.5)))
+				.attr("y", 0.5*36*(Math.pow(scalingFactor,0.5)))
+				.style("font-size", 22*(Math.pow(scalingFactor,0.5)))
 				.attr("text-anchor", "middle")
 				.attr("dominant-baseline", "middle")
 				.text("Back")
@@ -45,8 +45,8 @@ function createInstructions(text){
 	backButton.append("rect")
 				.attr("rx", 10)
 				.attr("ry", 10)
-				.attr("width", 75*(scalingFactor**0.5))
-				.attr("height", 36*(scalingFactor**0.5))
+				.attr("width", 75*(Math.pow(scalingFactor,0.5)))
+				.attr("height", 36*(Math.pow(scalingFactor,0.5)))
 				.attr("stroke", "gray")
 				.attr("stroke-width", 3)
 				.attr("fill", "white")
@@ -65,9 +65,9 @@ function createInstructions(text){
 	nextButton = instructionPane.append("g").attr("transform", "translate(" +0.92*instructionPaneSize.width+ "," +0.25*instructionPaneSize.height+ ")");
 				
 	nextButton.append("text")
-				.attr("x", 0.5*75*(scalingFactor**0.5))
-				.attr("y", 0.5*36*(scalingFactor**0.5))
-				.style("font-size", 22*(scalingFactor**0.5))
+				.attr("x", 0.5*75*(Math.pow(scalingFactor,0.5)))
+				.attr("y", 0.5*36*(Math.pow(scalingFactor,0.5)))
+				.style("font-size", 22*(Math.pow(scalingFactor,0.5)))
 				.attr("text-anchor", "middle")
 				.attr("dominant-baseline", "middle")
 				.text("Next")
@@ -76,8 +76,8 @@ function createInstructions(text){
 	nextButton.append("rect")
 				.attr("rx", 10)
 				.attr("ry", 10)
-				.attr("width", 75*(scalingFactor**0.5))
-				.attr("height", 36*(scalingFactor**0.5))
+				.attr("width", 75*(Math.pow(scalingFactor,0.5)))
+				.attr("height", 36*(Math.pow(scalingFactor,0.5)))
 				.attr("stroke", "gray")
 				.attr("stroke-width", 3)
 				.attr("fill", "white")

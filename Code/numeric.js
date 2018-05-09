@@ -23,45 +23,45 @@ function createNumerics(){
 	var initialAngleText = numerics_Pane.append("text")
 									.attr("x", 0.03*width)
 									.attr("y", 0.05*height)
-									.style("font-size", 24*(scalingFactor**0.5))
+									.style("font-size", 24*(Math.pow(scalingFactor,0.5)))
 									.style("font-family", "sans serif");
 
 	initialAngleText.append("tspan")
-				.attr("font-size", 24*(scalingFactor**0.5))
+				.attr("font-size", 24*(Math.pow(scalingFactor,0.5)))
 				.text("Initial Angle : " + theta);
 
 	initialAngleText.append("tspan")
-				.attr("font-size", 18*(scalingFactor**0.5))
+				.attr("font-size", 18*(Math.pow(scalingFactor,0.5)))
 				.attr("font-weight", "normal")
 				.attr("baseline-shift", "sub")
 				.text("0");
 
 	initialAngleText.append("tspan")
 				.attr("id", "initialAngleText")
-				.attr("font-size", 24*(scalingFactor**0.5))
+				.attr("font-size", 24*(Math.pow(scalingFactor,0.5)))
 				.text("(t) = " + initialAngle.toFixed(0) + degree);
 
 	numerics_Pane.append("text")
 				.attr("id", "angleText")
 				.attr("x", 0.03*width)
 				.attr("y", 0.1*height)
-				.style("font-size", 24*(scalingFactor**0.5))
+				.style("font-size", 24*(Math.pow(scalingFactor,0.5)))
 				.text("Angle : " +theta+ "(t) = " + angle.toFixed(0) + degree);
 
 	numerics_Pane.append("text")
 				.attr("id", "lengthText")
 				.attr("x", 0.03*width)
 				.attr("y", 0.15*height)
-				.style("font-size", 24*(scalingFactor**0.5))
+				.style("font-size", 24*(Math.pow(scalingFactor,0.5)))
 				.text("Length : L = " + rope_length.toFixed(1) + " metres");
 
 	numerics_Pane.append("text")
 				.attr("id", "timeText")
 				.attr("x", 0.03*width)
 				.attr("y", 0.2*height)
-				.style("font-size", 24*(scalingFactor**0.5))
+				.style("font-size", 24*(Math.pow(scalingFactor,0.5)))
 				.text("Time : t = " + simulationTime.toFixed(1) + " seconds");
-	
+
 }
 
 //****************************************************************************************************************************//

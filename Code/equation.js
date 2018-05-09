@@ -41,11 +41,11 @@ function createEquation(){
 				.attr("dominant-baseline", "middle");
 
 	equationAngle.append("tspan")
-				.attr("font-size", 48*(scalingFactor**0.5))
+				.attr("font-size", 48*(Math.pow(scalingFactor,0.5)))
 				.text(theta);
 
 	equationAngle.append("tspan")
-				.attr("font-size", 48*(scalingFactor**0.5))
+				.attr("font-size", 48*(Math.pow(scalingFactor,0.5)))
 				.text("(t)");
 
 	var equationAngleValue = equationPane.append("text")
@@ -55,7 +55,7 @@ function createEquation(){
 				.attr("dominant-baseline", "middle")
 				.attr("x", 0.12*equationPaneSize.width)
 				.attr("y", 0.5*equationPaneSize.height)
-				.attr("font-size", 48*(scalingFactor**0.5))
+				.attr("font-size", 48*(Math.pow(scalingFactor,0.5)))
 				.text(angle.toFixed(0) + degree);
 
 	equationPane.append("circle")
@@ -86,7 +86,7 @@ function createEquation(){
 		.attr("y", 0.5*equationPaneSize.height)
 		.attr("text-anchor", "middle")
 		.attr("dominant-baseline", "middle")
-		.attr("font-size", 48*(scalingFactor**0.5))
+		.attr("font-size", 48*(Math.pow(scalingFactor,0.5)))
 		.text("=");
 
 	equationPane.append("circle")
@@ -106,7 +106,7 @@ function createEquation(){
 				.attr("dominant-baseline", "middle");
 
 	equationInitialAngle.append("tspan")
-				.attr("font-size", 48*(scalingFactor**0.5))
+				.attr("font-size", 48*(Math.pow(scalingFactor,0.5)))
 				.text(theta);
 
 	equationInitialAngle.append("tspan")
@@ -116,7 +116,7 @@ function createEquation(){
 				.text("0");
 
 	equationInitialAngle.append("tspan")
-				.attr("font-size", 48*(scalingFactor**0.5))
+				.attr("font-size", 48*(Math.pow(scalingFactor,0.5)))
 				.text("(t)");
 
 	var equationInitialAngleValue = equationPane.append("text")
@@ -126,7 +126,7 @@ function createEquation(){
 				.attr("dominant-baseline", "middle")
 				.attr("x", 0.12*equationPaneSize.width + 3.2*r)
 				.attr("y", 0.5*equationPaneSize.height)
-				.attr("font-size", 48*(scalingFactor**0.5))
+				.attr("font-size", 48*(Math.pow(scalingFactor,0.5)))
 				.text(initialAngle.toFixed(0) + degree);
 
 	equationPane.append("circle")
@@ -159,7 +159,7 @@ shiftValue = 0.2*equationPaneSize.width;
 		.attr("y", 0.5*equationPaneSize.height)
 		.attr("text-anchor", "middle")
 		.attr("dominant-baseline", "middle")
-		.attr("font-size", 48*(scalingFactor**0.5))
+		.attr("font-size", 48*(Math.pow(scalingFactor,0.5)))
 		.text("cos(");
 
 	// Gravity
@@ -169,7 +169,7 @@ shiftValue = 0.2*equationPaneSize.width;
 				.attr("y", 0.3*equationPaneSize.height)
 				.attr("text-anchor", "middle")
 				.attr("dominant-baseline", "middle")
-				.attr("font-size", 48*(scalingFactor**0.5))
+				.attr("font-size", 48*(Math.pow(scalingFactor,0.5)))
 				.text("g");
 
 	equationPane.append("circle")
@@ -187,7 +187,7 @@ shiftValue = 0.2*equationPaneSize.width;
 				.attr("y", 0.7*equationPaneSize.height)
 				.attr("text-anchor", "middle")
 				.attr("dominant-baseline", "middle")
-				.attr("font-size", 48*(scalingFactor**0.5))
+				.attr("font-size", 48*(Math.pow(scalingFactor,0.5)))
 				.text("L");
 
 	var equationValueLength =  equationPane.append("text")
@@ -197,7 +197,7 @@ shiftValue = 0.2*equationPaneSize.width;
 				.attr("y", 0.7*equationPaneSize.height)
 				.attr("text-anchor", "middle")
 				.attr("dominant-baseline", "middle")
-				.attr("font-size", 48*(scalingFactor**0.5))
+				.attr("font-size", 48*(Math.pow(scalingFactor,0.5)))
 				.text(rope_length.toFixed(1));
 
 	equationPane.append("circle")
@@ -228,7 +228,7 @@ shiftValue = 0.2*equationPaneSize.width;
 				.attr("y", 0.5*equationPaneSize.height)
 				.attr("text-anchor", "middle")
 				.attr("dominant-baseline", "middle")
-				.attr("font-size", 48*(scalingFactor**0.5))
+				.attr("font-size", 48*(Math.pow(scalingFactor,0.5)))
 				.text("t");
 
 	var equationTimeValue =  equationPane.append("text")
@@ -238,7 +238,7 @@ shiftValue = 0.2*equationPaneSize.width;
 				.attr("y", 0.5*equationPaneSize.height)
 				.attr("text-anchor", "middle")
 				.attr("dominant-baseline", "middle")
-				.attr("font-size", 48*(scalingFactor**0.5))
+				.attr("font-size", 48*(Math.pow(scalingFactor,0.5)))
 				.text(oscillationTime.toFixed(0));
 
 	equationPane.append("circle")
@@ -276,7 +276,7 @@ shiftValue = 0.2*equationPaneSize.width;
 		.attr("y", 0.5*equationPaneSize.height)
 		.attr("text-anchor", "middle")
 		.attr("dominant-baseline", "middle")
-		.attr("font-size", 48*(scalingFactor**0.5))
+		.attr("font-size", 48*(Math.pow(scalingFactor,0.5)))
 		.text(")");
 
 	// Mouse Events

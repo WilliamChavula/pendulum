@@ -22,7 +22,7 @@ function createTaskPane(){
 	taskPane.append("text")
 			.attr("x", 0.01*taskPaneSize.width)
 			.attr("y", 0.1*taskPaneSize.height)
-			.style("font-size", 24*(scalingFactor**0.5))
+			.style("font-size", 24*(Math.pow(scalingFactor,0.5)))
 			.text(instruction);
 
 }

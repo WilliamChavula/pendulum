@@ -121,7 +121,7 @@ questionPane.append("text")
 				.attr("x", 0.01*questionPaneSize.width)
 				.attr("y", 0.15*questionPaneSize.height)
 				.attr("inline-size", questionPaneSize.width)
-				.style("font-size", 24*(scalingFactor**0.5))
+				.style("font-size", 24*(Math.pow(scalingFactor,0.5)))
 				.text(question[0]);
 
 questionPane.append("image")
@@ -136,7 +136,7 @@ questionPane.append("text")
 				.attr("x", 0.01*questionPaneSize.width)
 				.attr("y", 0.85*questionPaneSize.height)
 				.attr("inline-size", questionPaneSize.width)
-				.style("font-size", 24*(scalingFactor**0.5))
+				.style("font-size", 24*(Math.pow(scalingFactor,0.5)))
 				.text(question[1]);
 
 createAnswerButtons();

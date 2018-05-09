@@ -119,7 +119,7 @@ questionPane.append("text")
 				.attr("x", 0.01*questionPaneSize.width)
 				.attr("y", 0.15*questionPaneSize.height)
 				.attr("inline-size", questionPaneSize.width)
-				.style("font-size", 24*(scalingFactor**0.5))
+				.style("font-size", 24*(Math.pow(scalingFactor,0.5)))
 				.text(question);
 
 questionPane.append("image")
@@ -133,7 +133,7 @@ answerPane.append("text")
 				.attr("x", 0.01*answerPaneSize.width)
 				.attr("y", 0.15*answerPaneSize.height)
 				.attr("inline-size", answerPaneSize.width)
-				.style("font-size", 24*(scalingFactor**0.5))
+				.style("font-size", 24*(Math.pow(scalingFactor,0.5)))
 				.text("Mark your answer on the graph below :");
 
 answerPane.append("image")
