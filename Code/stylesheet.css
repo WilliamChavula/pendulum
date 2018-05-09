@@ -1,0 +1,37 @@
+body{
+    margin-top: 0px;
+    margin-right: 0px;
+    margin-bottom: 0px;
+    margin-left: 0px;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+  stroke-width: 1;
+}
+
+.axis text {
+  font: 10px sans-serif;
+}
+
+.schematicBare{
+  fill: white;
+}
+
+.schematicHover{
+  fill: lightblue;
+}
+
+.schematicSelect{
+  fill: steelblue;
+}
+
+text{
+  -webkit-user-select: none;  /* Chrome all / Safari all */
+  -moz-user-select: none;     /* Firefox all */
+  -ms-user-select: none;      /* IE 10+ */
+  user-select: none; 
+}
