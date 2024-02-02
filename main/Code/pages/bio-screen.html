@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pendulum Simulation</title>
+    <style>
+        input[type="radio"] + svg {
+            -webkit-transition: all 0.2s;
+            transition: all 0.2s;
+        }
+
+        input + svg {
+            cursor: pointer;
+        }
+
+        input[class="happy"]:hover + svg,
+        input[class="happy"]:checked + svg,
+        input[class="happy"]:focus + svg {
+            fill: rgb(0, 204, 79);
+        }
+
+        input[class="neutral"]:hover + svg,
+        input[class="neutral"]:checked + svg,
+        input[class="neutral"]:focus + svg {
+            fill: rgb(232, 214, 0);
+        }
+
+        input[class="sad"]:hover + svg,
+        input[class="sad"]:checked + svg,
+        input[class="sad"]:focus + svg {
+            fill: rgb(229, 132, 0);
+        }
+
+        .btn {
+            padding: 0.625rem 1.25rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            line-height: 1.25rem;
+            color: #ffffff;
+            border-radius: 0.5rem;
+            border: none;
+            background-color: #1e293b;
+            transition: background-color 150ms ease-in;
+            cursor: pointer;
+        }
+
+        .btn:focus {
+            outline: none;
+        }
+
+        .btn:hover {
+            background-color: #334155;
+        }
+    </style>
+    <script>
+        (function (i, s, o, g, r, a, m) {
+            i['GoogleAnalyticsObject'] = r;
+            i[r] = i[r] || function () {
+                (i[r].q = i[r].q || []).push(arguments)
+            }, i[r].l = 1 * new Date();
+            a = s.createElement(o),
+                m = s.getElementsByTagName(o)[0];
+            a.async = 1;
+            a.src = g;
+            m.parentNode.insertBefore(a, m)
+        })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+
+        ga('create', 'UA-104287448-1', 'auto');
+        ga('send', 'pageview');
+
+    </script>
+    <script src="../../Libraries/d3.v4.min.js"></script>
+    <script src="../../Libraries/d3.v4.min.js"></script>
+    <script src="../../Libraries/math.min.js"></script>
+
+    <script src="../js/schematic.js"></script>
+    <script src="../js/controls.js"></script>
+    <script src="../js/numeric.js"></script>
+    <script src="../js/instructions.js"></script>
+    <script src="../js/timer.js"></script>
+    <script src="../js/taskPane.js"></script>
+    <script src="../js/interaction.js"></script>
+    <script src="../api/v1.api.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="../styles/stylesheet.css">
+</head>
+<body>
+</body>
+<script type="text/javascript">
+    //****************************************************************************************************************************//
+    //	System Functions
+
+    const blockDefaultBehavior = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        return false;
+    };
+
+    window.oncontextmenu = blockDefaultBehavior;
+    window.onzoom = blockDefaultBehavior;
+    window.ontouchmove = blockDefaultBehavior;
+
+    //****************************************************************************************************************************//
+
+    const handleBioFormSubmit = async () => {
+        d3.event.preventDefault();
+        const gradeError = document.getElementById("grade-error");
+        const ageError = document.getElementById("age-error");
+        const genderError = document.getElementById("gender-error");
+        const scienceError = document.getElementById("science-error");
+        const mathError = document.getElementById("math-error");
+
+        const form = document.getElementById("bio-form");
+        const formData = new FormData(form);
+
+        const data = {}
+        for (let [key, value] of formData.entries()) {
+            data[key] = value;
+        }
+
+        const {age, gender, grade, ["math-interests"]: mathInterest, ["science-interests"]: scienceInterest} = data;
+
+        if (!validateInput(age)) {
+            ageError.textContent = "Age cannot be empty.";
+            ageError.style.color = "red";
+            ageError.style.marginTop = "0.5rem";
+        }
+
+        if (!validateInput(gender)) {
+            genderError.textContent = "Gender cannot be empty.";
+            genderError.style.color = "red";
+            genderError.style.marginTop = "0.5rem";
+        }
+
+        if (!validateInput(grade)) {
+            gradeError.textContent = "Grade field cannot be empty.";
+            gradeError.style.color = "red";
+            gradeError.style.marginTop = "0.5rem";
+        }
+
+
+        if (!validateInput(mathInterest)) {
+            mathError.textContent = "This value cannot be empty.";
+            mathError.style.color = "red";
+            mathError.style.marginTop = "0.5rem";
+        }
+
+        if (!validateInput(scienceInterest)) {
+            scienceError.textContent = "This value cannot be empty.";
+            scienceError.style.color = "red";
+            scienceError.style.marginTop = "0.5rem";
+        }
+
+        if (validateInput(age) &&
+            validateInput(gender) &&
+            validateInput(grade) &&
+            validateInput(mathInterest) &&
+            validateInput(scienceInterest)) {
+
+            await fetch("http://localhost:8081/profile", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                credentials: "include",
+                body: JSON.stringify(data)
+            });
+
+            window.location.replace("consent-form.html");
+        }
+    }
+
+    const body = d3.select("body")
+        .style("height", "100vh")
+        .style("padding", "1rem")
+        .style("background-color", "orange");
+
+    const titleContainer = body.append("div")
+        .style("display", "flex")
+        .style("justify-content", "center")
+        .style("align-items", "center")
+        .style("width", "100%")
+        .style("height", "12.625rem")
+        .style("border-radius", "1rem")
+        .style("background-color", "white")
+        .style("margin-bottom", "2rem");
+
+    titleContainer.append("h1")
+        .style("color", "black")
+        .style("font-size", "1.875rem")
+        .style("padding", "1.25rem")
+        .text("Please take a moment to enter details about yourself");
+
+    const formSection = body.append("section")
+        .style("display", "flex")
+        .style("flex-direction", "column")
+        .style("justify-content", "center")
+        .style("align-items", "center")
+        .style("padding", "1rem")
+        .style("border-radius", "1rem")
+        .style("background-color", "white");
+
+    const formContainer = formSection.append("div")
+        .style("display", "flex")
+        .style("flex-direction", "column")
+        .style("justify-content", "center")
+        .style("align-items", "center")
+        .style("width", "40rem")
+        // .style("max-width", "24rem")
+        .style("-webkit-box-shadow", "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)")
+        .style("-moz-box-shadow", "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)")
+        .style("box-shadow", "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)");
+
+    const form = formContainer.append("form")
+        .attr("id", "bio-form")
+        .style("width", "80%")
+        .style("border-radius", "0.25rem")
+        .style("padding-left", "2rem")
+        .style("padding-right", "2rem")
+        .style("padding-bottom", "2rem")
+        .style("margin-bottom", "1rem")
+        .on("submit", handleBioFormSubmit);
+
+    const gradeContainer = form.append("div")
+        .style("margin-bottom", "1rem");
+
+    gradeContainer
+        .append("label")
+        .attr("for", "grade-level")
+        .style("display", "block")
+        .style("color", "#334155")
+        .style("font-size", "0.875rem")
+        .style("font-weight", "bold")
+        .style("margin-bottom", "0.5rem")
+        .text("Which grade are you in?");
+
+    const gradeSelect = gradeContainer.append("select")
+        .attr("id", "grade-level")
+        .attr("name", "grade")
+        .attr("placeholder", "Enter grade you are in...")
+        .style("width", "100%")
+        .style("border-width", "1px")
+        .style("border-color", "#cbd5e1")
+        .style("border-radius", "0.25rem")
+        .style("padding-top", "0.5rem")
+        .style("padding-bottom", "0.5rem")
+        .style("padding-left", "0.75rem")
+        .style("padding-right", "0.75rem")
+
+    gradeSelect.append("option").text("Choose your grade").property("value", "").attr("selected", "true");
+    for (let lvl = 3; lvl < 13; lvl++) {
+        gradeSelect.append("option").property("value", lvl).text(lvl);
+    }
+    gradeContainer.append("small").attr("id", "grade-error").style("display", "block");
+
+    const ageAndGenderContainer = form.append("div")
+        .style("display", "flex")
+        .style("justify-content", "space-between")
+        .style("align-items", "center")
+        .style("margin-bottom", "1rem");
+
+    const ageContainer = ageAndGenderContainer.append("div").style("margin-bottom", "1rem");
+    ageContainer
+        .append("label")
+        .attr("for", "age")
+        .style("display", "block")
+        .style("color", "#334155")
+        .style("font-size", "0.875rem")
+        .style("font-weight", "bold")
+        .style("margin-bottom", "0.5rem")
+        .text("How old are you?");
+
+    const ageSelect = ageContainer.append("select")
+        .attr("id", "age")
+        .attr("name", "age")
+        .style("border-width", "1px")
+        .style("border-color", "#cbd5e1")
+        .style("border-radius", "0.25rem")
+        .style("padding-top", "0.5rem")
+        .style("padding-bottom", "0.5rem")
+        .style("padding-left", "0.75rem")
+        .style("padding-right", "0.75rem");
+
+    ageSelect.append("option").text("How old are you...").property("value", "").attr("selected", "true");
+
+    for (let age = 8; age < 19; age++) {
+        ageSelect.append("option").property("value", age).text(age);
+    }
+
+    ageContainer.append("small").attr("id", "age-error").style("display", "block");
+
+
+    const genderContainer = ageAndGenderContainer.append("div").style("margin-bottom", "1rem");
+    genderContainer.append("label")
+        .attr("for", "gender")
+        .style("display", "block")
+        .style("color", "#334155")
+        .style("font-size", "0.875rem")
+        .style("font-weight", "bold")
+        .style("margin-bottom", "0.5rem")
+        .text("What is your gender?");
+
+    const selectContainer = genderContainer.append("select")
+        .attr("id", "gender")
+        .attr("name", "gender")
+        .attr("placeholder", "Grade Level")
+        .style("border-width", "1px")
+        .style("border-color", "#cbd5e1")
+        .style("border-radius", "0.25rem")
+        .style("padding-top", "0.5rem")
+        .style("padding-bottom", "0.5rem")
+        .style("padding-left", "0.75rem")
+        .style("padding-right", "1rem");
+
+    selectContainer.append("option").text("Select gender").property("value", "").attr("selected", "true");
+    selectContainer.append("option").property("value", "Male").text("Male");
+    selectContainer.append("option").property("value", "Female").text("Female");
+    selectContainer.append("option").property("value", "Other").text("Other");
+    selectContainer.append("option").property("value", "Unspecified").text("Prefer not to say");
+
+    genderContainer.append("small").attr("id", "gender-error").style("display", "block");
+
+    const scienceEmojiContainer = form.append("div")
+        .style("display", "flex")
+        .style("align-items", "center")
+        .style("justify-content", "space-between");
+
+    scienceEmojiContainer.append("p")
+        .style("color", "black")
+        .style("font-size", "1rem")
+        .style("padding", "1.25rem")
+        .text("How interested are you in Science?")
+        .append("p").attr("id", "science-error");
+
+    const interestedScienceLabel = scienceEmojiContainer.append("label").attr("for", "science-interested")
+        .style("position", "relative")
+        .style("cursor", "pointer");
+
+    interestedScienceLabel
+        .append("input")
+        .attr("type", "radio")
+        .attr("name", "science-interests")
+        .attr("id", "science-interested")
+        .attr("class", "happy")
+        .attr("value", "interested")
+        .style("position", "absolute")
+        .style("opacity", 0);
+
+    interestedScienceLabel.append("svg").attr("viewBox", "0 0 22 22")
+        .attr("fill", "#dbdada")
+        .style("width", "36")
+        .style("height", "36")
+        .append("path")
+        .attr("d", "M12 1.998c5.524 0 10.002 4.478 10.002 10.002c0 5.523-4.478 10-10.002 10c-5.524.001-10.002-4.477-10.002-10C1.998 6.476 6.476 1.998 12 1.998m0 1.5a8.502 8.502 0 1 0 0 17.003a8.502 8.502 0 0 0 0-17.003M8.462 14.783A4.492 4.492 0 0 0 12 16.5a4.491 4.491 0 0 0 3.535-1.714a.75.75 0 1 1 1.177.93A5.99 5.99 0 0 1 12 18a5.991 5.991 0 0 1-4.717-2.29a.75.75 0 1 1 1.179-.928M9 8.75a1.25 1.25 0 1 1 0 2.499A1.25 1.25 0 0 1 9 8.75m6 0a1.25 1.25 0 1 1 0 2.499a1.25 1.25 0 0 1 0-2.499");
+
+    const averageScienceLabel = scienceEmojiContainer.append("label").attr("for", "science-average").style("position", "relative")
+        .style("cursor", "pointer");
+
+    averageScienceLabel.append("input")
+        .attr("type", "radio")
+        .attr("name", "science-interests")
+        .attr("id", "science-average")
+        .attr("class", "neutral")
+        .attr("value", "neutral")
+        .style("position", "absolute")
+        .style("opacity", 0);
+
+    averageScienceLabel.append("svg").attr("viewBox", "0 0 22 22")
+        .attr("fill", "#dbdada")
+        .style("width", "36")
+        .style("height", "36")
+        .append("path")
+        .attr("d", "M9 8.751a1.25 1.25 0 1 1 0 2.499a1.25 1.25 0 0 1 0-2.5m6 0a1.25 1.25 0 1 1 0 2.499a1.25 1.25 0 0 1 0-2.499M8.25 15a.75.75 0 0 0 0 1.5h7.5a.75.75 0 0 0 0-1.5zM2 12C2 6.477 6.477 2 12 2s10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12m10-8.5a8.5 8.5 0 1 0 0 17a8.5 8.5 0 0 0 0-17");
+
+    const sadScienceLabel = scienceEmojiContainer.append("label").attr("for", "science-not-interested").style("position", "relative").style("cursor", "pointer");
+
+    sadScienceLabel.append("input")
+        .attr("type", "radio")
+        .attr("name", "science-interests")
+        .attr("id", "science-not-interested")
+        .attr("value", "not interested")
+        .attr("class", "sad")
+        .style("position", "absolute")
+        .style("opacity", 0);
+
+    sadScienceLabel.append("svg").attr("viewBox", "0 0 22 22")
+        .attr("fill", "#dbdada")
+        .style("width", "36")
+        .style("height", "36")
+        .append("g")
+        .append("path")
+        .attr("d", "M12 1.998c5.524 0 10.002 4.478 10.002 10.002c0 5.523-4.478 10-10.002 10c-5.524.001-10-4.477-10-10C1.999 6.476 6.476 1.998 12 1.998m0 1.5a8.502 8.502 0 1 0 0 17.003a8.502 8.502 0 0 0 0-17.003m0 10c1.631 0 3.16.654 4.281 1.795a.75.75 0 1 1-1.07 1.05a4.485 4.485 0 0 0-3.21-1.346a4.485 4.485 0 0 0-3.217 1.352a.75.75 0 1 1-1.072-1.05A5.984 5.984 0 0 1 12 13.498M9 8.75a1.25 1.25 0 1 1 0 2.499A1.25 1.25 0 0 1 9 8.75m6 0a1.25 1.25 0 1 1 0 2.499a1.25 1.25 0 0 1 0-2.499");
+
+    // form.append("small").attr("id", "science-error");
+
+    const mathEmojiContainer = form.append("div")
+        .style("display", "flex")
+        .style("align-items", "center")
+        .style("justify-content", "space-between");
+
+    mathEmojiContainer.append("p")
+        .style("color", "black")
+        .style("font-size", "1rem")
+        .style("padding", "1.25rem")
+        .text("How interested are you in Mathematics?").append("p").attr("id", "math-error");
+
+    const interestedMathLabel = mathEmojiContainer.append("label").attr("for", "math-interested")
+        .style("position", "relative")
+        .style("cursor", "pointer");
+
+    interestedMathLabel
+        .append("input")
+        .attr("type", "radio")
+        .attr("name", "math-interests")
+        .attr("id", "math-interested")
+        .attr("class", "happy")
+        .attr("value", "interested")
+        .style("position", "absolute")
+        .style("opacity", 0);
+
+    interestedMathLabel.append("svg").attr("viewBox", "0 0 22 22")
+        .attr("fill", "#dbdada")
+        .style("width", "36")
+        .style("height", "36")
+        .append("path")
+        .attr("d", "M12 1.998c5.524 0 10.002 4.478 10.002 10.002c0 5.523-4.478 10-10.002 10c-5.524.001-10.002-4.477-10.002-10C1.998 6.476 6.476 1.998 12 1.998m0 1.5a8.502 8.502 0 1 0 0 17.003a8.502 8.502 0 0 0 0-17.003M8.462 14.783A4.492 4.492 0 0 0 12 16.5a4.491 4.491 0 0 0 3.535-1.714a.75.75 0 1 1 1.177.93A5.99 5.99 0 0 1 12 18a5.991 5.991 0 0 1-4.717-2.29a.75.75 0 1 1 1.179-.928M9 8.75a1.25 1.25 0 1 1 0 2.499A1.25 1.25 0 0 1 9 8.75m6 0a1.25 1.25 0 1 1 0 2.499a1.25 1.25 0 0 1 0-2.499");
+
+    const averageMathLabel = mathEmojiContainer.append("label").attr("for", "math-average").style("position", "relative")
+        .style("cursor", "pointer");
+
+    averageMathLabel.append("input")
+        .attr("type", "radio")
+        .attr("name", "math-interests")
+        .attr("id", "math-average")
+        .attr("class", "neutral")
+        .attr("value", "neutral")
+        .style("position", "absolute")
+        .style("opacity", 0);
+
+    averageMathLabel.append("svg").attr("viewBox", "0 0 22 22")
+        .attr("fill", "#dbdada")
+        .style("width", "36")
+        .style("height", "36")
+        .append("path")
+        .attr("d", "M9 8.751a1.25 1.25 0 1 1 0 2.499a1.25 1.25 0 0 1 0-2.5m6 0a1.25 1.25 0 1 1 0 2.499a1.25 1.25 0 0 1 0-2.499M8.25 15a.75.75 0 0 0 0 1.5h7.5a.75.75 0 0 0 0-1.5zM2 12C2 6.477 6.477 2 12 2s10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12m10-8.5a8.5 8.5 0 1 0 0 17a8.5 8.5 0 0 0 0-17");
+
+    const sadMathLabel = mathEmojiContainer.append("label").attr("for", "math-not-interested").style("position", "relative").style("cursor", "pointer");
+
+    sadMathLabel.append("input")
+        .attr("type", "radio")
+        .attr("name", "math-interests")
+        .attr("id", "math-not-interested")
+        .attr("value", "not interested")
+        .attr("class", "sad")
+        .style("position", "absolute")
+        .style("opacity", 0);
+
+    sadMathLabel.append("svg").attr("viewBox", "0 0 22 22")
+        .attr("fill", "#dbdada")
+        .style("width", "36")
+        .style("height", "36")
+        .append("g")
+        .append("path")
+        .attr("d", "M12 1.998c5.524 0 10.002 4.478 10.002 10.002c0 5.523-4.478 10-10.002 10c-5.524.001-10-4.477-10-10C1.999 6.476 6.476 1.998 12 1.998m0 1.5a8.502 8.502 0 1 0 0 17.003a8.502 8.502 0 0 0 0-17.003m0 10c1.631 0 3.16.654 4.281 1.795a.75.75 0 1 1-1.07 1.05a4.485 4.485 0 0 0-3.21-1.346a4.485 4.485 0 0 0-3.217 1.352a.75.75 0 1 1-1.072-1.05A5.984 5.984 0 0 1 12 13.498M9 8.75a1.25 1.25 0 1 1 0 2.499A1.25 1.25 0 0 1 9 8.75m6 0a1.25 1.25 0 1 1 0 2.499a1.25 1.25 0 0 1 0-2.499");
+
+    // form.append("small").attr("id", "math-error");
+
+    form.append("div")
+        .style("display", "flex")
+        .append("button")
+        .attr("type", "submit")
+        .attr("class", "btn")
+        .text("Submit");
+</script>
+</html>

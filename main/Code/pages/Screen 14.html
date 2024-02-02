@@ -1,0 +1,206 @@
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Pendulum Simulation</title>
+    <meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1.0,maximum-scale=1.0"/>
+    <script src="../../Libraries/d3.v4.min.js"></script>
+    <script src="../../Libraries/math.min.js"></script>
+
+    <script src="../js/schematic.js"></script>
+    <script src="../js/controls.js"></script>
+    <script src="../js/numeric.js"></script>
+    <script src="../js/instructions.js"></script>
+    <script src="../js/timer.js"></script>
+    <script src="../js/equation.js"></script>
+    <script src="../js/dial.js"></script>
+    <script src="../js/taskPane.js"></script>
+    <script src="../js/graph.js"></script>
+    <script src="../js/answerButtons.js"></script>
+    <script src="../js/interaction.js"></script>
+    <script src="../api/v1.api.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="../styles/stylesheet.css">
+</head>
+
+<body></body>
+
+<script type="text/javascript">
+
+    //****************************************************************************************************************************//
+    //	System Functions
+
+    window.oncontextmenu = function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        return false;
+    };
+
+    window.onzoom = function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        return false;
+    };
+
+    window.ontouchmove = function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        return false;
+    };
+
+    //****************************************************************************************************************************//
+    // Creating Variables
+
+    let degree = String.fromCharCode(176);
+    let theta = String.fromCharCode(952);
+
+    let width = innerWidth,
+        height = innerHeight;
+
+    if ((9 / 16) * width <= height) {
+        height = (9 / 16) * width;
+    } else {
+        width = (16 / 9) * height;
+    }
+
+    let scalingFactor = height / 1080;
+
+    //****************************************************************************************************************************//
+    let start_idx = localStorage.getItem("index")
+    let idx_gen = indexGenerator((+start_idx ?? 0) + 1)
+
+    // Canvas
+
+    let canvas = d3.select("body")
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height);
+
+    canvas.append("rect")
+        .attr("id", "background")
+        .attr("width", width)
+        .attr("height", height)
+        .attr("fill", "orange");
+
+    createInstructions("Choose the correct option");
+    // createInstructions();
+
+    //****************************************************************************************************************************//
+    // Panes
+
+    let questionPanePos = {x: 0.01 * width, y: 0.13 * height};
+    let questionPaneSize = {width: 0.98 * width, height: 0.3 * height};
+    let questionPane = canvas.append("g")
+        .attr("transform", "translate(" + questionPanePos.x + "," + questionPanePos.y + ")");
+    questionPane.append("rect")
+        .attr("x", 0)
+        .attr("y", 0)
+        .attr("width", questionPaneSize.width)
+        .attr("height", questionPaneSize.height)
+        .attr("rx", 5)
+        .attr("ry", 5)
+        .attr("fill", "white");
+
+    let answerPanePos = {x: 0.01 * width, y: 0.45 * height};
+    let answerPaneSize = {width: 0.98 * width, height: 0.53 * height};
+    let answerPane = canvas.append("g")
+        .attr("transform", "translate(" + answerPanePos.x + "," + answerPanePos.y + ")");
+    answerPane.append("rect")
+        .attr("x", 0)
+        .attr("y", 0)
+        .attr("width", answerPaneSize.width)
+        .attr("height", answerPaneSize.height)
+        .attr("rx", 5)
+        .attr("ry", 5)
+        .attr("fill", "white");
+
+    //****************************************************************************************************************************//
+    // Question and Answers
+
+    let question = ["A car is moving along a road at a constant speed of 35 miles/hour", "Which graph below can be used to represent the car’s movement?"];
+
+    questionPane.append("text")
+        .attr("x", 0.01 * questionPaneSize.width)
+        .attr("y", 0.15 * questionPaneSize.height)
+        .attr("inline-size", questionPaneSize.width)
+        .style("font-size", "24px")
+        .text(question[0]);
+
+    questionPane.append("image")
+        .attr("xlink:href", "../../Images/car_velocity.png")
+        .attr("width", 0.5 * questionPaneSize.width)
+        .attr("height", 0.4 * questionPaneSize.height)
+        .attr("x", 0.25 * questionPaneSize.width)
+        .attr("y", 0.2 * questionPaneSize.height);
+
+    questionPane.append("text")
+        .attr("x", 0.01 * questionPaneSize.width)
+        .attr("y", 0.15 * questionPaneSize.height + 5 * 28)
+        .attr("inline-size", questionPaneSize.width)
+        .style("font-size", "24px")
+        .text(question[1]);
+
+    let answers = ["../../Images/y_constant14.png", "../../Images/sinecurve14.png", "../../Images/x_constant14.png", "../../Images/line14.png"];
+    let answer = "A";
+
+    createAnswerButtonsGraph({stage_name: aoiStage.screen_14, question: question.join(), correctAnswer: answer});
+
+    //****************************************************************************************************************************//
+    // Navigation
+
+    const backButtonClickedHandler = async () => {
+        d3.event.preventDefault();
+
+        const start = Date.now();
+        const interaction = new InteractionBuilder()
+            .setTimestamp(Date.now())
+            .setInteractionStart(start)
+            .setAOIName(aoiLabel.aoiBackBtn)
+            .setAOIStageName(aoiStage.screen_14)
+            .setEventInfo({
+                evt_label: interaction_events.SINGLE_CLICK,
+                interaction_type: interaction_events.LEFT_CLICK
+            })
+            .setIndex(idx_gen.next().value)
+            .setEventXCoord(d3.event.x)
+            .setEventYCoord(d3.event.y)
+            .setInteractionEnd(Date.now())
+            .setDuration(Date.now() - start)
+            .build();
+
+        await postInteraction(interaction);
+
+        window.location.href = "Screen 13.html";
+    }
+
+    const nextButtonClickedHandler = async () => {
+        d3.event.preventDefault();
+        const idx = idx_gen.next().value
+        localStorage.setItem("index", idx)
+
+        const start = Date.now();
+        const interaction = new InteractionBuilder()
+            .setTimestamp(Date.now())
+            .setInteractionStart(start)
+            .setAOIName(aoiLabel.aoiNextBtn)
+            .setAOIStageName(aoiStage.screen_14)
+            .setEventInfo({
+                evt_label: interaction_events.SINGLE_CLICK,
+                interaction_type: interaction_events.LEFT_CLICK
+            })
+            .setIndex(idx)
+            .setEventXCoord(d3.event.x)
+            .setEventYCoord(d3.event.y)
+            .setInteractionEnd(Date.now())
+            .setDuration(Date.now() - start)
+            .build();
+
+        await postInteraction(interaction);
+
+        window.location.href = "Screen 15.html";
+    }
+
+    backButton.on("click", backButtonClickedHandler);
+
+    nextButton.on("click", nextButtonClickedHandler);
+
+</script>

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pendulum Simulation</title>
+    <style>
+        input[type="radio"] + svg {
+            -webkit-transition: all 0.2s;
+            transition: all 0.2s;
+        }
+
+        input + svg {
+            cursor: pointer;
+        }
+
+        input[class="happy"]:hover + svg,
+        input[class="happy"]:checked + svg,
+        input[class="happy"]:focus + svg {
+            fill: rgb(0, 204, 79);
+        }
+
+        input[class="neutral"]:hover + svg,
+        input[class="neutral"]:checked + svg,
+        input[class="neutral"]:focus + svg {
+            fill: rgb(232, 214, 0);
+        }
+
+        input[class="sad"]:hover + svg,
+        input[class="sad"]:checked + svg,
+        input[class="sad"]:focus + svg {
+            fill: rgb(229, 132, 0);
+        }
+
+        .btn {
+            padding: 0.625rem 1.25rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            line-height: 1.25rem;
+            color: #ffffff;
+            border-radius: 0.5rem;
+            border: none;
+            background-color: #1e293b;
+            transition: background-color 150ms ease-in;
+            cursor: pointer;
+        }
+
+        .btn:focus {
+            outline: none;
+        }
+
+        .btn:hover {
+            background-color: #334155;
+        }
+    </style>
+    <script>
+        (function (i, s, o, g, r, a, m) {
+            i['GoogleAnalyticsObject'] = r;
+            i[r] = i[r] || function () {
+                (i[r].q = i[r].q || []).push(arguments)
+            }, i[r].l = 1 * new Date();
+            a = s.createElement(o),
+                m = s.getElementsByTagName(o)[0];
+            a.async = 1;
+            a.src = g;
+            m.parentNode.insertBefore(a, m)
+        })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+
+        ga('create', 'UA-104287448-1', 'auto');
+        ga('send', 'pageview');
+
+    </script>
+    <script src="../../Libraries/d3.v4.min.js"></script>
+    <script src="../../Libraries/d3.v4.min.js"></script>
+    <script src="../../Libraries/math.min.js"></script>
+
+    <script src="../js/schematic.js"></script>
+    <script src="../js/controls.js"></script>
+    <script src="../js/numeric.js"></script>
+    <script src="../js/instructions.js"></script>
+    <script src="../js/timer.js"></script>
+    <script src="../js/taskPane.js"></script>
+    <script src="../js/interaction.js"></script>
+    <script src="../api/v1.api.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="../styles/stylesheet.css">
+</head>
+<body>
+</body>
+<script type="text/javascript">
+    //****************************************************************************************************************************//
+    //	System Functions
+
+    const blockDefaultBehavior = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        return false;
+    };
+
+    window.oncontextmenu = blockDefaultBehavior;
+    window.onzoom = blockDefaultBehavior;
+    window.ontouchmove = blockDefaultBehavior;
+
+    //****************************************************************************************************************************//
+    const assentContent = `
+    We are doing a project to learn more about using online game-like tool to help us learn science
+    and math. You don’t have to do this study if you don’t want to. If you say you’ll participate but
+    change your mind later, that’s OK too. No one will be mad at you. If you decide to participate in
+    this project, you will work with an online game-like science simulation tool. You will play with this
+    tool. We will help you understand how to play with this tool and what it is about. We will also ask
+    you questions and talk to you about what you are learning. The goal is to teach you like how a
+    teacher would teach you one-to-one. The entire activity (gameplay + questions + talking about
+    learning and the tool) should take about 30-60 minutes. You may get tired during learning or
+    need a break, but it should not be any different than a normal classroom lesson. Our game-like
+    tool may help you learn more and should be fun to work with while learning. Would you like to
+    participate in this project?
+    `;
+
+    const body = d3.select("body")
+        .style("height", "100vh")
+        .style("padding", "1rem")
+        .style("background-color", "orange");
+
+    const titleContainer = body.append("div")
+        .classed('consent-title-container', true)
+
+    titleContainer.append("h1")
+        .style("color", "black")
+        .style("font-size", "1.875rem")
+        .style("padding", "1.25rem")
+        .text("Minor Participation Assent");
+
+    const informationSection = body.append("section")
+        .classed('consent-info-section', true);
+
+    informationSection.append("div")
+        .append('p')
+        .classed('consent-content', true)
+        .text(assentContent);
+
+    // informationSection.append("div")
+    //     .append('span')
+    //     .classed('consent-content-header', true)
+    //     .text('Data collection and Usage: ')
+    //     .append('p')
+    //     .classed('consent-content', true)
+    //     .text('I understand that as part of this research program data will be collected from me through the different. \n' +
+    //         'interactions (clicking buttons, dragging items, and responding to quizzes). I consent to collecting, storing, \n' +
+    //         'and analyzing my research-related data by the researchers involved. \n' +
+    //         'I understand that data collected will be treated confidentially and used solely for research purposes.');
+    //
+    // informationSection.append("div")
+    //     .append('span')
+    //     .classed('consent-content-header', true)
+    //     .text('Confidentiality and Anonymity: ')
+    //     .append('p')
+    //     .classed('consent-content', true)
+    //     .text('I know my identity will be kept confidential, and any personal information collected during the research \n' +
+    //         'will be stored securely. Any information published or shared will be presented in an anonymized \n' +
+    //         'and aggregated form to ensure my privacy is protected.');
+
+
+    /*
+    TODO: After checking the box, enable next button to go to the screen page.
+     */
+
+    const consentSection = body.append("section")
+        .classed('consent-section', true)
+
+    const contentDiv = consentSection
+        .append('div')
+        .classed('consent-section-div', true);
+
+    const consentEmojiContainer = contentDiv.append("div")
+        .style("display", "flex")
+        .style("align-items", "center")
+        .style("justify-content", "space-between")
+        .style("margin-left", "3rem");
+
+    const yesConsent = consentEmojiContainer.append("button").attr("for", "id-consent-yes")
+        .classed('consent-button', true)
+        .on("click", async () => {
+            //  Log interaction
+            await postInteraction({consented: true}, "/consent")
+            window.location.replace("Screen 1.html")
+        });
+
+    yesConsent.append("svg").attr("viewBox", "0 0 22 22")
+        .attr("fill", "#16a34a")
+        .style("width", "60")
+        .style("height", "60")
+        .append("path")
+        .attr("d", "M12 1.998c5.524 0 10.002 4.478 10.002 10.002c0 5.523-4.478 10-10.002 10c-5.524.001-10.002-4.477-10.002-10C1.998 6.476 6.476 1.998 12 1.998m0 1.5a8.502 8.502 0 1 0 0 17.003a8.502 8.502 0 0 0 0-17.003M8.462 14.783A4.492 4.492 0 0 0 12 16.5a4.491 4.491 0 0 0 3.535-1.714a.75.75 0 1 1 1.177.93A5.99 5.99 0 0 1 12 18a5.991 5.991 0 0 1-4.717-2.29a.75.75 0 1 1 1.179-.928M9 8.75a1.25 1.25 0 1 1 0 2.499A1.25 1.25 0 0 1 9 8.75m6 0a1.25 1.25 0 1 1 0 2.499a1.25 1.25 0 0 1 0-2.499")
+
+    const noConsent = consentEmojiContainer.append("button")
+        .attr("for", "id-consent-no")
+        .classed('consent-button', true)
+        .on("click", async () => {
+            // Log interaction
+            await postInteraction({consented: false}, "/consent")
+            // Expire the OTP
+            await postInteraction({}, "/expire")
+            window.location.replace("index.html")
+        });
+
+    noConsent.append("svg").attr("viewBox", "0 0 22 22")
+        .attr("fill", "#facc15")
+        .style("width", "60")
+        .style("height", "60")
+        .append("g")
+        .append("path")
+        .attr("d", "M12 1.998c5.524 0 10.002 4.478 10.002 10.002c0 5.523-4.478 10-10.002 10c-5.524.001-10-4.477-10-10C1.999 6.476 6.476 1.998 12 1.998m0 1.5a8.502 8.502 0 1 0 0 17.003a8.502 8.502 0 0 0 0-17.003m0 10c1.631 0 3.16.654 4.281 1.795a.75.75 0 1 1-1.07 1.05a4.485 4.485 0 0 0-3.21-1.346a4.485 4.485 0 0 0-3.217 1.352a.75.75 0 1 1-1.072-1.05A5.984 5.984 0 0 1 12 13.498M9 8.75a1.25 1.25 0 1 1 0 2.499A1.25 1.25 0 0 1 9 8.75m6 0a1.25 1.25 0 1 1 0 2.499a1.25 1.25 0 0 1 0-2.499")
+
+
+    // contentDiv.append('input')
+    //     .attr('id', 'id-consent-checkbox')
+    //     .attr('type', 'checkbox')
+    //     .classed('checkbox-input', true);
+    //
+    // contentDiv.append('label')
+    //     .attr('for', 'id-consent-checkbox')
+    //     .classed('checkbox-label', true)
+    //     .text('I have carefully read and understood the information provided in this consent form. I have had the opportunity to discuss and \n' +
+    //         'and clarify any concerns before signing. By checking the box I indicate my informed consent to participate in \n' +
+    //         'the research program conducted.')
+    //
+    // consentSection.append("div")
+    //     .style("display", "flex")
+    //     .style('margin-top', '1rem')
+    //     .append("button")
+    //     .classed("consent-button", true)
+    //     .attr('id', 'id-consent-button')
+    //     .text("I Agree");
+</script>

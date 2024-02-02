@@ -1,0 +1,214 @@
+<html lang="en">
+<head>
+    <title>Pendulum Simulation</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1.0,maximum-scale=1.0"/>
+    <script src="../../Libraries/d3.v4.min.js"></script>
+    <script src="../../Libraries/d3-selection-multi.v1.min.js"></script>
+    <script src="../../Libraries/math.min.js"></script>
+
+    <script>
+        /**
+         IIFE function takes 7 arguments
+         @param i - holds the global window object which is the current browser window
+         @param s - holds the global document object which is the current browser page
+         @param o - holds a literal `script` string value which is used in the function to create script element tag
+         @param g - holds a reference to google-analytics library
+         @param r - holds a literal `ga` string value
+         @param a - initialized within body of IIFE, a script tag that has the google-analytics library as source
+         @param m - is assigned the first script tag in the document
+         */
+        (function (i, s, o, g, r, a, m) {
+            i['GoogleAnalyticsObject'] = r;
+            i[r] = i[r] || function () {
+                (i[r].q = i[r].q || []).push(arguments)
+            }, i[r].l = 1 * new Date();
+            a = s.createElement(o),
+                m = s.getElementsByTagName(o)[0];
+            a.async = 1;
+            a.src = g;
+            m.parentNode.insertBefore(a, m)
+        })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+
+        ga('create', 'UA-104287448-1', 'auto');
+        ga('send', 'pageview');
+
+    </script>
+
+    <link rel="stylesheet" type="text/css" href="../styles/stylesheet.css">
+    <link rel="stylesheet" type="text/css" href="../styles/style.css">
+</head>
+
+<body></body>
+
+<script type="text/javascript">
+
+    localStorage.removeItem("index")
+    //****************************************************************************************************************************//
+    //	Creating Pane
+
+    d3.select("body")
+        .append("div")
+        .attr("id", "Panes");
+
+    //****************************************************************************************************************************//
+    //	Principal Divs
+
+    let size_ref = 0.55 * Math.pow(innerWidth * innerHeight, 1 / 5);
+    d3.select("body").style("font-size", size_ref);
+
+    d3.select("#Panes")
+        .append("div")
+        .style("padding-top", "2%")
+        .append("text")
+        .style("font-size", 2.6 * size_ref)
+        .style("text-anchor", "middle")
+        .style("font-family", "sans-serif")
+        .style("font-weight", "bold")
+        .style("color", "#919090")
+        .style("text-decoration", "blink")
+        .text(""); // Todo: Replace with new name from Dr Pande
+
+    d3.select("#Panes")
+        .append("div")
+        .style("padding-top", "2")
+        .append("text")
+        .style("font-size", 1.8 * size_ref)
+        .style("text-anchor", "middle")
+        .style("font-family", "sans-serif")
+        .style("font-weight", "normal")
+        .style("color", "gray")
+        .style("text-decoration", "blink")
+        .text(""); // Todo: Replace with new name from Dr Pande
+
+    let image_size = 0;
+    if (innerWidth < 800) {
+        image_size = 0.5 * innerWidth;
+    } else {
+        image_size = 500;
+    }
+
+    let padding_size = 0;
+    if (innerWidth < innerHeight) {
+        padding_size = 10;
+    } else {
+        padding_size = 5;
+    }
+
+    const navigate = (destination) => window.location.href = destination;
+    const processEnter = async () => {
+        const input = document.getElementById('id_input').value;
+        const res = await fetch("http://localhost:8081/auth/register", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify({access_code: input})
+        })
+
+        /**
+         * @type {Object}
+         * @param {boolean} requestStatus.is_valid
+         * @param {string} [requestStatus.message]
+         */
+        const requestStatus = await res.json();
+        console.log({requestStatus})
+
+        if(requestStatus?.is_valid && !requestStatus.is_valid) {
+            document.getElementById("id_input").classList.add("input-error")
+            document.querySelectorAll("li").forEach(el => {
+                el.classList.add("error")
+            })
+            document.getElementById("err").style.display = "block";
+            document.getElementById("err").innerHTML = `<li>${requestStatus.message}</li>`;
+        } else {
+            // window.location.replace("Screen 1.html");
+            window.location.replace("bio-screen.html");
+        }
+
+    }
+
+    d3.select("#Panes")
+        .append("div")
+        .styles({
+            "padding-top": padding_size + "%", "width": image_size
+        })
+        .append("p")
+        .styles({
+            "font-size": 2.6 * size_ref,
+            "font-family": "sans-serif",
+            "font-weight": "bold",
+            "color": "black",
+            "text-align": "center"
+        })
+        .text("Dynamic Pendulum System");
+
+    d3.select("#Panes")
+        .append("div")
+        .styles({"padding-top": "2%"})
+        .append("img")
+        .attrs({"src": "../../Images/thumbnail.png"})
+        .styles({"width": image_size, "box-shadow": "rgba(0, 0, 0, 0.59) 0px 2px 10px 2px"});
+
+    const container = d3.select('#Panes')
+        .append("div")
+        .styles({"width": "100%"});
+
+    container
+        .attr('class', "Input")
+        .append('input')
+        .attr('type', 'text')
+        .attr('id', 'id_input')
+        .attr('placeholder', 'Enter the given 5-digit code')
+        .attr('class', 'Input-text');
+
+    const list = container
+        .append("div")
+        .attr("id", "id_help-text")
+        .styles({"font-size": "0.75rem", "color": "#6B7280"})
+        .append("ul")
+        .styles({"padding": 0, "padding-left": "1rem"});
+
+    list.append("li").attr("id", "err").style("display", "none")
+
+    list.append("li")
+        .text("Make sure the code you entered begins with a letter from the alphabet");
+
+    list.append("li")
+        .text("Make sure the code you entered contains at least 3 numbers and maximum 5 numbers.")
+
+    container
+        .append("div")
+        .append("button")
+        .attr("type", "button")
+        .attr("name", "btn")
+        .attr("id", "button1")
+        .attr('class', 'btn')
+        .text("Sign In")
+        .on("click", processEnter);
+
+
+    let temp_text =
+        d3.select("#Panes")
+            .append("div")
+            .styles({"position": null, "text-align": "center"})
+            .append("text")
+            .styles({"font-size": 2 * size_ref});
+
+    temp_text.append("tspan")
+        .styles({"color": "gray", "font-size": ".875rem",})
+        .text("designed by")
+
+    temp_text.append("tspan")
+        .styles({
+            "color": "steelblue",
+            "font-size": ".875rem",
+            "cursor": "hand",
+            "font-weight": "normal",
+            "font-family": "sans-serif"
+        })
+        .text(" Learning Sciences Research Group")
+        .on("click", () => navigate("http://lsr.hbcse.tifr.res.in/"));
+
+</script>
